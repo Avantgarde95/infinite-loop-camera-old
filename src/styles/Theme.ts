@@ -1,4 +1,7 @@
 import { Theme } from "@emotion/react";
+import { createTheme } from "@mui/material/styles";
+
+export const muiTheme = createTheme();
 
 export const theme: Theme = {
   color: {

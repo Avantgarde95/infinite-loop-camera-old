@@ -1,7 +1,8 @@
 import React from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 import styled from "@emotion/styled";
-import Select from "@mui/material/Select";
+import Button from "@mui/material/Button";
+import Select, { SelectProps } from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 
 import { camerasState, currentCameraIndexState } from "states/Camera";
@@ -13,22 +14,20 @@ const ControlSection = () => {
     currentCameraIndexState
   );
 
+  const handleChangeCamera: SelectProps<number>["onChange"] = (event) => {
+    setCurrentCameraIndex(Number(event.target.value));
+  };
+
   return (
     <Container>
       <ShotButton />
-      <select
-        onChange={(event) => {
-          setCurrentCameraIndex(
-            Number(event.target.options[event.target.selectedIndex].value)
-          );
-        }}
-      >
+      <Select value={currentCameraIndex} onChange={handleChangeCamera}>
         {cameras.map((camera, index) => (
-          <option key={index} value={index}>
-            {camera.label}
-          </option>
+          <MenuItem key={index} value={index}>
+            {camera.mediaDeviceInfo.label}
+          </MenuItem>
         ))}
-      </select>
+      </Select>
     </Container>
   );
 };
@@ -43,7 +42,7 @@ const Container = styled.div`
   margin-top: 1rem;
 `;
 
-const ShotButton = styled.button`
+const ShotButton = styled(Button)`
   width: 4rem;
   height: 4rem;
   border: 0;

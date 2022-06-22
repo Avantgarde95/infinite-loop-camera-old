@@ -1,16 +1,15 @@
 import adapter from "webrtc-adapter";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue } from "recoil";
 
 import { isBrowser } from "utils/RenderUtils";
 import { dError, dLog } from "utils/DebugUtils";
-import { camerasState, currentCameraIndexState } from "states/Camera";
+import { Camera, camerasState, currentCameraIndexState } from "states/Camera";
 
 let video: HTMLVideoElement | undefined = undefined;
-let cameraInfos: Array<{ label: string; mediaStream: MediaStream }> = [];
 
-async function createVideo() {
+function createVideo() {
   if (isBrowser() && typeof video === "undefined") {
     video = document.createElement("video");
 
@@ -21,55 +20,63 @@ async function createVideo() {
   }
 }
 
-async function createCameras() {
-  if (!isBrowser()) {
-    return;
-  }
-
-  if (cameraInfos.length > 0) {
-    return;
-  }
-
-  const devices = (await navigator.mediaDevices.enumerateDevices()).filter(
-    (device) => device.kind === "videoinput"
-  );
-
-  cameraInfos = [];
-
-  for (const device of devices) {
-    try {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        audio: false,
-        video: {
-          deviceId: device.deviceId,
-        },
-      });
-
-      cameraInfos.push({ label: device.label, mediaStream });
-    } catch (error) {
-      dError(error);
-    }
-  }
-}
-
-export default function useCamera(args: {
-  onPlay: (video: HTMLVideoElement) => void;
-  onFrame: (video: HTMLVideoElement) => void;
-}) {
+export default function useCamera(onPlay: (video: HTMLVideoElement) => void) {
   const [cameras, setCameras] = useRecoilState(camerasState);
   const currentCameraIndex = useRecoilValue(currentCameraIndexState);
+
+  useEffect(() => {
+    createVideo();
+  }, []);
 
   useEffect(
     () => {
       (async () => {
-        await createVideo();
-        await createCameras();
+        dLog("Stopping the existing tracks for safety...");
 
-        setCameras(cameraInfos.map((info) => ({ label: info.label })));
+        for (const camera of cameras) {
+          camera.mediaStream.getTracks().forEach((track) => track.stop());
+        }
+
+        const mediaDeviceInfos = (
+          await navigator.mediaDevices.enumerateDevices()
+        ).filter((mediaDeviceInfo) => mediaDeviceInfo.kind === "videoinput");
+
+        dLog(
+          `Got the cameras: ${mediaDeviceInfos
+            .map((info) => `${info.deviceId}: ${info.label}`)
+            .join(", ")}`
+        );
+
+        const newCameras: Array<Camera> = [];
+
+        for (const mediaDeviceInfo of mediaDeviceInfos) {
+          try {
+            const mediaStream = await navigator.mediaDevices.getUserMedia({
+              audio: false,
+              video: {
+                deviceId: mediaDeviceInfo.deviceId,
+              },
+            });
+
+            newCameras.push({ mediaDeviceInfo, mediaStream });
+          } catch (error) {
+            dError(error);
+          }
+        }
+
+        dLog(
+          `Retrieved the streams of ${newCameras
+            .map((camera) => camera.mediaDeviceInfo.deviceId)
+            .join(", ")}`
+        );
+        setCameras(newCameras);
       })();
     },
-    // TODO: Avoid dependency hack.
-    []
+    // We don't put `cameras` in the dependency array.
+    // Normally we can avoid this hack by using callback state setter.
+    // But because of the awaits, we can't use that...
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [setCameras]
   );
 
   useEffect(() => {
@@ -77,37 +84,22 @@ export default function useCamera(args: {
       return;
     }
 
-    if (currentCameraIndex >= cameraInfos.length) {
+    if (currentCameraIndex >= cameras.length) {
       return;
     }
 
-    video.pause();
-    video.srcObject = cameraInfos[currentCameraIndex].mediaStream;
+    video.srcObject = cameras[currentCameraIndex].mediaStream;
 
     video.oncanplaythrough = () => {
       if (typeof video === "undefined") {
         return;
       }
 
-      args.onPlay(video);
+      onPlay(video);
     };
 
     video.play();
-  }, [cameras, currentCameraIndex]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (typeof video === "undefined") {
-        return;
-      }
-
-      args.onFrame(video);
-    }, 1000 / 30);
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, [video, args.onFrame]);
+  }, [cameras, currentCameraIndex, onPlay]);
 
   return { video };
 }

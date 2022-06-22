@@ -1,7 +1,8 @@
 import { atom } from "recoil";
 
-interface Camera {
-  label: string;
+export interface Camera {
+  mediaDeviceInfo: MediaDeviceInfo;
+  mediaStream: MediaStream;
 }
 
 export const camerasState = atom<Array<Camera>>({

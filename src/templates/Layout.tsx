@@ -15,17 +15,24 @@ const Layout = ({ children }: LayoutProps) => (
 );
 
 const Container = styled.div`
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
 
   width: 100%;
   height: 100%;
-  max-width: 500px;
   margin-left: auto;
   margin-right: auto;
 
   color: ${({ theme }) => theme.color.foreground1};
   background-color: ${({ theme }) => theme.color.background};
+
+  @media (min-width: 500px) {
+    width: 500px;
+    padding: 1rem;
+    border-left: 2px dashed black;
+    border-right: 2px dashed black;
+  }
 `;
 
 const Header = styled.header`

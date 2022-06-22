@@ -3,6 +3,7 @@ import styled from "@emotion/styled";
 
 import useCanvas from "hooks/useCanvas";
 import useCamera from "hooks/useCamera";
+import useFrame from "hooks/useFrame";
 
 function clearCanvas(context: CanvasRenderingContext2D) {
   context.fillStyle = "#000000";
@@ -13,30 +14,35 @@ const VideoSection = () => {
   const { setCanvasRef, contextRef } = useCanvas();
   const context = contextRef.current;
 
-  useCamera({
-    onPlay: (video) => {
-      if (context === null) {
-        return;
-      }
+  const { video } = useCamera((video) => {
+    if (context === null) {
+      return;
+    }
 
-      const width = 512;
-      const height = video.videoHeight / (video.videoWidth / width);
+    const width = 512;
+    const height = video.videoHeight / (video.videoWidth / width);
 
-      video.width = width;
-      video.height = height;
-      context.canvas.width = Math.min(width, height);
-      context.canvas.height = Math.min(width, height);
+    video.width = width;
+    video.height = height;
+    context.canvas.width = Math.min(width, height);
+    context.canvas.height = Math.min(width, height);
+  });
 
-      clearCanvas(context);
-      console.log(width, height);
-    },
-    onFrame: (video) => {
-      if (context === null) {
-        return;
-      }
+  useFrame(() => {
+    if (context === null) {
+      return;
+    }
 
-      context.drawImage(video, 0, 0);
-    },
+    if (typeof video === "undefined") {
+      return;
+    }
+
+    clearCanvas(context);
+    context.save();
+    context.translate(context.canvas.width, 0);
+    context.scale(-1, 1);
+    context.drawImage(video, 0, 0);
+    context.restore();
   });
 
   return (
