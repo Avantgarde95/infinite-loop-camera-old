@@ -1,5 +1,8 @@
 import { useRef } from "react";
 
+/**
+ * Hook for handling the canvas on React.
+ */
 export default function useCanvas() {
   const contextRef = useRef<CanvasRenderingContext2D | null>(null);
 
@@ -15,5 +18,5 @@ export default function useCanvas() {
     }
   };
 
-  return { setCanvasRef, contextRef };
+  return { setCanvasRef, context: contextRef.current };
 }

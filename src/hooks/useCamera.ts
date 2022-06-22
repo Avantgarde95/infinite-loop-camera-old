@@ -1,32 +1,35 @@
 import adapter from "webrtc-adapter";
 
 import { useEffect, useState } from "react";
-import { useRecoilState, useRecoilValue } from "recoil";
 
-import { isBrowser } from "utils/RenderUtils";
 import { dError, dLog } from "utils/DebugUtils";
-import { Camera, camerasState, currentCameraIndexState } from "states/Camera";
 
-let video: HTMLVideoElement | undefined = undefined;
+type CameraType = "Front" | "Back" | "Unknown";
 
-function createVideo() {
-  if (isBrowser() && typeof video === "undefined") {
-    video = document.createElement("video");
+interface Camera {
+  mediaDeviceInfo: MediaDeviceInfo;
+  mediaStream: MediaStream;
+  type: CameraType;
+}
 
-    // For supporting playing without user interaction.
-    video.muted = true;
+function guessCameraType(mediaDeviceInfo: MediaDeviceInfo): CameraType {
+  const label = mediaDeviceInfo.label.toLowerCase();
 
-    dLog("Created the video element.");
+  if (label.indexOf("front") > 0) {
+    return "Front";
+  } else if (label.indexOf("back") > 0) {
+    return "Back";
+  } else {
+    return "Unknown";
   }
 }
 
-export default function useCamera(onPlay: (video: HTMLVideoElement) => void) {
-  const [cameras, setCameras] = useRecoilState(camerasState);
-  const currentCameraIndex = useRecoilValue(currentCameraIndexState);
-
-  useEffect(() => {
-    createVideo();
-  }, []);
+/**
+ * Hook for retrieving the devices.
+ */
+export default function useCamera() {
+  const [cameras, setCameras] = useState<Array<Camera>>([]);
+  const [currentCameraIndex, setCurrentCameraIndex] = useState(0);
 
   useEffect(
     () => {
@@ -58,7 +61,11 @@ export default function useCamera(onPlay: (video: HTMLVideoElement) => void) {
               },
             });
 
-            newCameras.push({ mediaDeviceInfo, mediaStream });
+            newCameras.push({
+              mediaDeviceInfo,
+              mediaStream,
+              type: guessCameraType(mediaDeviceInfo),
+            });
           } catch (error) {
             dError(error);
           }
@@ -69,7 +76,13 @@ export default function useCamera(onPlay: (video: HTMLVideoElement) => void) {
             .map((camera) => camera.mediaDeviceInfo.deviceId)
             .join(", ")}`
         );
+
+        if (newCameras.length <= 0) {
+          return;
+        }
+
         setCameras(newCameras);
+        setCurrentCameraIndex(0);
       })();
     },
     // We don't put `cameras` in the dependency array.
@@ -79,27 +92,5 @@ export default function useCamera(onPlay: (video: HTMLVideoElement) => void) {
     [setCameras]
   );
 
-  useEffect(() => {
-    if (typeof video === "undefined") {
-      return;
-    }
-
-    if (currentCameraIndex >= cameras.length) {
-      return;
-    }
-
-    video.srcObject = cameras[currentCameraIndex].mediaStream;
-
-    video.oncanplaythrough = () => {
-      if (typeof video === "undefined") {
-        return;
-      }
-
-      onPlay(video);
-    };
-
-    video.play();
-  }, [cameras, currentCameraIndex, onPlay]);
-
-  return { video };
+  return { cameras, currentCameraIndex, setCurrentCameraIndex };
 }

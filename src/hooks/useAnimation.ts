@@ -1,13 +1,16 @@
 import { useEffect } from "react";
 
-export default function useFrame(onFrame: () => void) {
+/**
+ * Hook for running an animation.
+ */
+export default function useAnimation(onFrame: () => void, fps: number) {
   useEffect(() => {
     const interval = setInterval(() => {
       onFrame();
-    }, 1000 / 30);
+    }, 1000 / fps);
 
     return () => {
       clearInterval(interval);
     };
-  }, [onFrame]);
+  }, [onFrame, fps]);
 }
