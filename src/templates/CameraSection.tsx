@@ -1,5 +1,7 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import styled from "@emotion/styled";
+import useCanvas from "hooks/useCanvas";
+import useCamera from "hooks/useCamera";
 
 function clearCanvas(context: CanvasRenderingContext2D) {
   context.fillStyle = "#000000";
@@ -7,26 +9,54 @@ function clearCanvas(context: CanvasRenderingContext2D) {
 }
 
 const CameraSection = () => {
-  const contextRef = useRef<CanvasRenderingContext2D | null>(null);
+  const { setCanvasRef, contextRef } = useCanvas();
+  const { videoRef } = useCamera({ cameraType: "front" });
+  const context = contextRef.current;
+  const video = videoRef.current;
 
-  const canvasRef = (element: HTMLCanvasElement | null) => {
-    if (element === null) {
+  useEffect(() => {
+    if (context === null) {
       return;
     }
 
-    contextRef.current = element.getContext("2d");
-
-    if (contextRef.current === null) {
-      throw new Error("Can't retrieve the context!");
+    if (video === null) {
+      return;
     }
 
-    clearCanvas(contextRef.current);
-  };
+    video.oncanplay = () => {
+      const width = 512;
+      const height = video.videoHeight / (video.videoWidth / width);
+
+      video.width = width;
+      video.height = height;
+      context.canvas.width = width;
+      context.canvas.height = height;
+
+      clearCanvas(context);
+
+      console.log(
+        video.width,
+        video.height,
+        context.canvas.width,
+        context.canvas.height
+      );
+    };
+
+    video.muted = true;
+    video.play();
+
+    const interval = setInterval(() => {
+      context.drawImage(video, 0, 0);
+    }, 1000 / 30);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [context, video]);
 
   return (
     <Container>
-      <Canvas ref={canvasRef} />
-      <Time>2022.06.21</Time>
+      <Canvas ref={setCanvasRef} />
     </Container>
   );
 };
@@ -44,16 +74,6 @@ const Container = styled.div`
 const Canvas = styled.canvas`
   width: 100%;
   height: 100%;
-`;
-
-const Time = styled.div`
-  position: absolute;
-
-  left: 1rem;
-  bottom: 1rem;
-  font-size: 1.5rem;
-
-  color: #ffffff;
 `;
 
 export default CameraSection;
