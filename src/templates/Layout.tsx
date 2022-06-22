@@ -30,8 +30,8 @@ const Container = styled.div`
   @media (min-width: 500px) {
     width: 500px;
     padding: 1rem;
-    border-left: 2px dashed black;
-    border-right: 2px dashed black;
+    border-left: 2px dashed ${({ theme }) => theme.color.foreground2};
+    border-right: 2px dashed ${({ theme }) => theme.color.foreground2};
   }
 `;
 

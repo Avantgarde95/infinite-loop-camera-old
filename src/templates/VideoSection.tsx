@@ -1,16 +1,16 @@
 import React, { useEffect } from "react";
+import { useRecoilValue } from "recoil";
 import styled from "@emotion/styled";
 
 import useCanvas from "hooks/useCanvas";
 import useCamera from "hooks/useCamera";
 import useFrame from "hooks/useFrame";
-
-function clearCanvas(context: CanvasRenderingContext2D) {
-  context.fillStyle = "#000000";
-  context.fillRect(0, 0, context.canvas.width, context.canvas.height);
-}
+import { flipCameraState, shotCameraState } from "states/Camera";
 
 const VideoSection = () => {
+  const flipCamera = useRecoilValue(flipCameraState);
+  const shotCamera = useRecoilValue(shotCameraState);
+
   const { setCanvasRef, contextRef } = useCanvas();
   const context = contextRef.current;
 
@@ -37,13 +37,39 @@ const VideoSection = () => {
       return;
     }
 
-    clearCanvas(context);
+    context.clearRect(0, 0, context.canvas.width, context.canvas.height);
     context.save();
-    context.translate(context.canvas.width, 0);
-    context.scale(-1, 1);
+
+    if (flipCamera) {
+      context.translate(context.canvas.width, 0);
+      context.scale(-1, 1);
+    }
+
     context.drawImage(video, 0, 0);
     context.restore();
   });
+
+  useEffect(() => {
+    if (shotCamera <= 0) {
+      return;
+    }
+
+    if (context === null) {
+      return;
+    }
+
+    const link = document.createElement("a");
+    link.download = `Download-${shotCamera}.png`;
+
+    const dataURL = context.canvas.toDataURL("image/png");
+
+    link.href = dataURL.replace(
+      /^data:image\/png/,
+      "data:application/octet-stream"
+    );
+
+    link.click();
+  }, [shotCamera, context]);
 
   return (
     <Container>
