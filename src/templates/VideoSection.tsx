@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { useRecoilValue } from "recoil";
 import styled from "@emotion/styled";
 
+import { getTime, getTimeStrings } from "utils/DateUtils";
 import useCanvas from "hooks/useCanvas";
 import useCamera from "hooks/useCamera";
 import useFrame from "hooks/useFrame";
@@ -47,6 +48,25 @@ const VideoSection = () => {
 
     context.drawImage(video, 0, 0);
     context.restore();
+
+    context.fillStyle = "white";
+    context.font = "18px sans-serif";
+
+    context.fillText("∞ Infinite loop coding", context.canvas.width - 200, 30);
+
+    const timeStrings = getTimeStrings(getTime(new Date()));
+
+    context.fillText(
+      `${timeStrings.year}.${timeStrings.month}.${timeStrings.monthDay} (${timeStrings.weekDay})`,
+      10,
+      context.canvas.height - 40
+    );
+
+    context.fillText(
+      `${timeStrings.hour}:${timeStrings.minute} ${timeStrings.ampm}`,
+      10,
+      context.canvas.height - 20
+    );
   });
 
   useEffect(() => {
