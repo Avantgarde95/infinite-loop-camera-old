@@ -1,27 +1,113 @@
-import { useRef } from "react";
+import adapter from "webrtc-adapter";
 
-export default function useCamera(args: { cameraType: "front" | "back" }) {
-  const videoRef = useRef<HTMLVideoElement | null>(null);
+import { useEffect } from "react";
+import { useRecoilState, useRecoilValue } from "recoil";
 
-  if (typeof document !== "undefined" && videoRef.current === null) {
-    videoRef.current = document.createElement("video");
+import { isBrowser } from "utils/RenderUtils";
+import { dError, dLog } from "utils/DebugUtils";
+import { camerasState, currentCameraIndexState } from "states/Camera";
+
+let video: HTMLVideoElement | undefined = undefined;
+let cameraInfos: Array<{ label: string; mediaStream: MediaStream }> = [];
+
+async function createVideo() {
+  if (isBrowser() && typeof video === "undefined") {
+    video = document.createElement("video");
+
+    // For supporting playing without user interaction.
+    video.muted = true;
+
+    dLog("Created the video element.");
+  }
+}
+
+async function createCameras() {
+  if (!isBrowser()) {
+    return;
   }
 
-  const video = videoRef.current;
+  if (cameraInfos.length > 0) {
+    return;
+  }
 
-  if (video !== null) {
-    (async () => {
+  const devices = (await navigator.mediaDevices.enumerateDevices()).filter(
+    (device) => device.kind === "videoinput"
+  );
+
+  cameraInfos = [];
+
+  for (const device of devices) {
+    try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         audio: false,
         video: {
-          facingMode:
-            args.cameraType === "back" ? { exact: "environment" } : "user",
+          deviceId: device.deviceId,
         },
       });
 
-      video.srcObject = mediaStream;
-    })();
+      cameraInfos.push({ label: device.label, mediaStream });
+    } catch (error) {
+      dError(error);
+    }
   }
+}
 
-  return { videoRef };
+export default function useCamera(args: {
+  onPlay: (video: HTMLVideoElement) => void;
+  onFrame: (video: HTMLVideoElement) => void;
+}) {
+  const [cameras, setCameras] = useRecoilState(camerasState);
+  const currentCameraIndex = useRecoilValue(currentCameraIndexState);
+
+  useEffect(
+    () => {
+      (async () => {
+        await createVideo();
+        await createCameras();
+
+        setCameras(cameraInfos.map((info) => ({ label: info.label })));
+      })();
+    },
+    // TODO: Avoid dependency hack.
+    []
+  );
+
+  useEffect(() => {
+    if (typeof video === "undefined") {
+      return;
+    }
+
+    if (currentCameraIndex >= cameraInfos.length) {
+      return;
+    }
+
+    video.pause();
+    video.srcObject = cameraInfos[currentCameraIndex].mediaStream;
+
+    video.oncanplaythrough = () => {
+      if (typeof video === "undefined") {
+        return;
+      }
+
+      args.onPlay(video);
+    };
+
+    video.play();
+  }, [cameras, currentCameraIndex]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (typeof video === "undefined") {
+        return;
+      }
+
+      args.onFrame(video);
+    }, 1000 / 30);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [video, args.onFrame]);
+
+  return { video };
 }

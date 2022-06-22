@@ -1,12 +1,12 @@
 import React from "react";
 import styled from "@emotion/styled";
 
-import CameraSection from "templates/CameraSection";
+import VideoSection from "templates/VideoSection";
 import ControlSection from "templates/ControlSection";
 
 const HomePage = () => (
   <Container>
-    <CameraSection />
+    <VideoSection />
     <ControlSection />
   </Container>
 );

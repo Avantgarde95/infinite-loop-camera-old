@@ -1,19 +1,37 @@
 import React from "react";
+import { useRecoilState, useRecoilValue } from "recoil";
 import styled from "@emotion/styled";
-import { IoFlashlight } from "react-icons/io5";
-import { GrPowerCycle } from "react-icons/gr";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
 
-const ControlSection = () => (
-  <Container>
-    <IconButton>
-      <IoFlashlight />
-    </IconButton>
-    <ShotButton />
-    <IconButton>
-      <GrPowerCycle />
-    </IconButton>
-  </Container>
-);
+import { camerasState, currentCameraIndexState } from "states/Camera";
+
+const ControlSection = () => {
+  const cameras = useRecoilValue(camerasState);
+
+  const [currentCameraIndex, setCurrentCameraIndex] = useRecoilState(
+    currentCameraIndexState
+  );
+
+  return (
+    <Container>
+      <ShotButton />
+      <select
+        onChange={(event) => {
+          setCurrentCameraIndex(
+            Number(event.target.options[event.target.selectedIndex].value)
+          );
+        }}
+      >
+        {cameras.map((camera, index) => (
+          <option key={index} value={index}>
+            {camera.label}
+          </option>
+        ))}
+      </select>
+    </Container>
+  );
+};
 
 const Container = styled.div`
   display: flex;
@@ -32,26 +50,6 @@ const ShotButton = styled.button`
   border-radius: 50%;
 
   background-color: ${({ theme }) => theme.color.foreground2};
-`;
-
-const IconButton = styled.button`
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-
-  border: 0;
-  width: 3rem;
-  height: 3rem;
-  padding: 0;
-  font-size: 2rem;
-
-  color: ${({ theme }) => theme.color.foreground2};
-  background-color: transparent;
-
-  path {
-    stroke: ${({ theme }) => theme.color.foreground2};
-  }
 `;
 
 export default ControlSection;

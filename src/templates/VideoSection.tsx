@@ -1,5 +1,6 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import styled from "@emotion/styled";
+
 import useCanvas from "hooks/useCanvas";
 import useCamera from "hooks/useCamera";
 
@@ -8,51 +9,35 @@ function clearCanvas(context: CanvasRenderingContext2D) {
   context.fillRect(0, 0, context.canvas.width, context.canvas.height);
 }
 
-const CameraSection = () => {
+const VideoSection = () => {
   const { setCanvasRef, contextRef } = useCanvas();
-  const { videoRef } = useCamera({ cameraType: "front" });
   const context = contextRef.current;
-  const video = videoRef.current;
 
-  useEffect(() => {
-    if (context === null) {
-      return;
-    }
+  useCamera({
+    onPlay: (video) => {
+      if (context === null) {
+        return;
+      }
 
-    if (video === null) {
-      return;
-    }
-
-    video.oncanplay = () => {
       const width = 512;
       const height = video.videoHeight / (video.videoWidth / width);
 
       video.width = width;
       video.height = height;
-      context.canvas.width = width;
-      context.canvas.height = height;
+      context.canvas.width = Math.min(width, height);
+      context.canvas.height = Math.min(width, height);
 
       clearCanvas(context);
+      console.log(width, height);
+    },
+    onFrame: (video) => {
+      if (context === null) {
+        return;
+      }
 
-      console.log(
-        video.width,
-        video.height,
-        context.canvas.width,
-        context.canvas.height
-      );
-    };
-
-    video.muted = true;
-    video.play();
-
-    const interval = setInterval(() => {
       context.drawImage(video, 0, 0);
-    }, 1000 / 30);
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, [context, video]);
+    },
+  });
 
   return (
     <Container>
@@ -76,4 +61,4 @@ const Canvas = styled.canvas`
   height: 100%;
 `;
 
-export default CameraSection;
+export default VideoSection;
