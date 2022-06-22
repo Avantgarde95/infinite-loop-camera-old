@@ -1,5 +1,8 @@
 import React, { ReactNode } from "react";
 import styled from "@emotion/styled";
+import { IoMdReverseCamera } from "react-icons/io";
+
+import Link from "components/Link";
 
 interface LayoutProps {
   children: ReactNode;
@@ -8,7 +11,11 @@ interface LayoutProps {
 const Layout = ({ children }: LayoutProps) => (
   <Container>
     <Header>
-      <Logo>∞</Logo> Camera
+      <IoMdReverseCamera />
+      &nbsp;Infinite camera
+      <Website href="https://github.com/Avantgarde95/infinite-camera">
+        {"</>"}
+      </Website>
     </Header>
     <Main>{children}</Main>
   </Container>
@@ -29,7 +36,6 @@ const Container = styled.div`
 
   @media (min-width: 500px) {
     width: 500px;
-    padding: 1rem;
     border-left: 2px dashed ${({ theme }) => theme.color.foreground2};
     border-right: 2px dashed ${({ theme }) => theme.color.foreground2};
   }
@@ -42,20 +48,26 @@ const Header = styled.header`
   align-items: center;
 
   width: 100%;
-  padding: 0.2rem 1rem;
+  padding: 0.5rem 0.5rem;
 
   font-size: 1.5rem;
-`;
-
-const Logo = styled.span`
-  margin-right: 0.5rem;
-
-  font-size: 2rem;
 `;
 
 const Main = styled.main`
   width: 100%;
   height: 100%;
+`;
+
+const Website = styled(Link)`
+  margin-left: auto;
+
+  font-family: inherit;
+  color: inherit;
+  text-decoration: none;
+
+  &:hover {
+    color: ${({ theme }) => theme.color.foreground2};
+  }
 `;
 
 export default Layout;
