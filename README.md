@@ -32,3 +32,10 @@ Check the code
 
 - Run `yarn lint`
 - Run `yarn lint` to check & fix
+
+## Testing on mobile device
+
+In some browsers (ex. Chrome), WebRTC requires HTTPS connection.  
+So if you use the test server with your phone, camera feature won't work in some cases.  
+Then, install [ngrok](https://ngrok.com/) and run `ngrok http 3000` in the other terminal.  
+It will generate a HTTPS url (ex. `https://...ngrok.io`). Open `https://...ngrok.io/infinite-camera` with your phone.
