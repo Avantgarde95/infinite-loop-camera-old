@@ -1,5 +1,5 @@
 {
-  "name": "infinite-camera",
+  "name": "infinite-loop-camera",
   "version": "0.0.1",
   "description": "Simple camera app for infinite loop coding",
   "author": "Avantgarde95",
@@ -36,8 +36,6 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "export": "next export -o docs",
-    "postexport": "node postexport.js",
     "lint": "next lint --dir src",
     "lint:fix": "next lint --dir src --fix"
   }

@@ -13,7 +13,7 @@ interface LayoutProps {
 const Layout = ({ children }: LayoutProps) => (
   <Container>
     <Header>
-      <Title>∞ Infinite camera</Title>
+      <Title>∞ 무한루프 카메라</Title>
       <Controls>
         <Control
           LinkComponent={Link}

@@ -1,4 +1,4 @@
-# infinite-camera
+# infinite-loop-camera
 
 Simple camera app for infinite loop coding
 
@@ -21,7 +21,7 @@ Install the dependencies
 Run in the development mode
 
 - Run `yarn dev`
-- Open <http://localhost:3000/infinite-camera> on the browser
+- Open <http://localhost:3000> on the browser
 
 Generate the static website
 
@@ -38,4 +38,4 @@ Check the code
 In some browsers (ex. Chrome), WebRTC requires HTTPS connection.  
 So if you use the test server with your phone, camera feature won't work in some cases.  
 Then, install [ngrok](https://ngrok.com/) and run `ngrok http 3000` in the other terminal.  
-It will generate a HTTPS url (ex. `https://...ngrok.io`). Open `https://...ngrok.io/infinite-camera` with your phone.
+It will generate a HTTPS url (ex. `https://...ngrok.io`). Open that URL with your phone.

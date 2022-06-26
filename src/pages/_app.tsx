@@ -15,7 +15,7 @@ const App = ({ Component, pageProps }: AppProps) => (
       <ThemeProvider theme={theme}>
         <Global styles={globalStyle} />
         <Head>
-          <title>Infinite camera</title>
+          <title>Infinite loop camera</title>
         </Head>
         <Layout>
           <Component {...pageProps} />
