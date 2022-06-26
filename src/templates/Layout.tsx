@@ -1,8 +1,10 @@
 import React, { ReactNode } from "react";
 import styled from "@emotion/styled";
-import { IoMdReverseCamera } from "react-icons/io";
+import { FaGithub } from "react-icons/fa";
 
 import Link from "components/Link";
+import { css, Theme } from "@emotion/react";
+import Button from "@mui/material/Button";
 
 interface LayoutProps {
   children: ReactNode;
@@ -11,11 +13,15 @@ interface LayoutProps {
 const Layout = ({ children }: LayoutProps) => (
   <Container>
     <Header>
-      <IoMdReverseCamera />
-      &nbsp;Infinite camera
-      <Website href="https://github.com/Avantgarde95/infinite-camera">
-        {"</>"}
-      </Website>
+      <Title>∞ Infinite camera</Title>
+      <Controls>
+        <Control
+          LinkComponent={Link}
+          href="https://github.com/Avantgarde95/infinite-camera"
+        >
+          <FaGithub />
+        </Control>
+      </Controls>
     </Header>
     <Main>{children}</Main>
   </Container>
@@ -48,9 +54,7 @@ const Header = styled.header`
   align-items: center;
 
   width: 100%;
-  padding: 0.5rem 0.5rem;
-
-  font-size: 1.5rem;
+  padding: 1rem 1rem;
 `;
 
 const Main = styled.main`
@@ -58,16 +62,28 @@ const Main = styled.main`
   height: 100%;
 `;
 
-const Website = styled(Link)`
+const Title = styled.h1`
+  margin: 0;
+  padding: 0;
+
+  font-size: 1.5rem;
+  font-weight: normal;
+  line-height: 1.5rem;
+`;
+
+const Controls = styled.div`
   margin-left: auto;
+`;
 
-  font-family: inherit;
-  color: inherit;
-  text-decoration: none;
+const Control = styled(Button)`
+  width: 2rem;
+  height: 2rem;
+  min-width: auto;
+  padding: 0;
+  font-size: 2rem;
 
-  &:hover {
-    color: ${({ theme }) => theme.color.foreground2};
-  }
+  border: 0;
+  border-radius: 50%;
 `;
 
 export default Layout;

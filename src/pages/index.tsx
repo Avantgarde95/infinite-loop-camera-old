@@ -39,7 +39,7 @@ const HomePage = () => {
       return;
     }
 
-    const width = 512;
+    const width = 1024;
     const height = video.videoHeight / (video.videoWidth / width);
 
     video.width = width;
@@ -60,7 +60,8 @@ const HomePage = () => {
     const width = context.canvas.width;
     const height = context.canvas.height;
 
-    context.clearRect(0, 0, width, height);
+    context.fillStyle = "#000000";
+    context.fillRect(0, 0, width, height);
     context.save();
 
     if (flipCamera) {
@@ -72,24 +73,29 @@ const HomePage = () => {
     context.restore();
 
     context.fillStyle = "white";
-    context.font = "18px sans-serif";
+    context.font = '16px "Gaegu", sans-serif';
 
-    context.fillText("∞ Infinite loop coding", width - 200, 30);
+    const title = "∞ Infinite loop coding";
+    const titleWidth = context.measureText(title).width;
+
+    context.font = `${(16 / titleWidth) * (width * 0.4)}px "Gaegu", sans-serif`;
+
+    context.fillText(title, width - context.measureText(title).width - 20, 50);
 
     const timeStrings = getTimeStrings(getTime(new Date()));
 
     context.fillText(
       `${timeStrings.year}.${timeStrings.month}.${timeStrings.monthDay} (${timeStrings.weekDay})`,
-      10,
-      height - 40
+      20,
+      height - 80
     );
 
     context.fillText(
       `${timeStrings.hour}:${timeStrings.minute} ${timeStrings.ampm}`,
-      10,
-      height - 20
+      20,
+      height - 40
     );
-  }, 30);
+  }, 15);
 
   useEffect(() => {
     if (typeof currentCamera === "undefined") {
