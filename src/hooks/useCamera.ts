@@ -1,16 +1,8 @@
-import adapter from "webrtc-adapter";
+import { useEffect } from "react";
+import { useRecoilCallback } from "recoil";
 
-import { useEffect, useState } from "react";
-
-import { dError, dLog } from "utils/DebugUtils";
-
-type CameraType = "Front" | "Back" | "Unknown";
-
-interface Camera {
-  mediaDeviceInfo: MediaDeviceInfo;
-  mediaStream: MediaStream;
-  type: CameraType;
-}
+import { dLog, dError } from "utils/DebugUtils";
+import { Camera, camerasState, CameraType } from "states/Camera";
 
 function guessCameraType(mediaDeviceInfo: MediaDeviceInfo): CameraType {
   const label = mediaDeviceInfo.label.toLowerCase();
@@ -24,73 +16,62 @@ function guessCameraType(mediaDeviceInfo: MediaDeviceInfo): CameraType {
   }
 }
 
-/**
- * Hook for retrieving the devices.
- */
-export default function useCamera() {
-  const [cameras, setCameras] = useState<Array<Camera>>([]);
-  const [currentCameraIndex, setCurrentCameraIndex] = useState(0);
+function stopCameras(cameras: Array<Camera>) {
+  for (const camera of cameras) {
+    for (const track of camera.stream.getTracks()) {
+      track.stop();
+    }
+  }
+}
 
-  useEffect(
-    () => {
-      (async () => {
-        dLog("Stopping the existing tracks for safety...");
-
-        for (const camera of cameras) {
-          camera.mediaStream.getTracks().forEach((track) => track.stop());
-        }
-
-        const mediaDeviceInfos = (
-          await navigator.mediaDevices.enumerateDevices()
-        ).filter((mediaDeviceInfo) => mediaDeviceInfo.kind === "videoinput");
-
-        dLog(
-          `Got the cameras: ${mediaDeviceInfos
-            .map((info) => `${info.deviceId}: ${info.label}`)
-            .join(", ")}`
-        );
-
-        const newCameras: Array<Camera> = [];
-
-        for (const mediaDeviceInfo of mediaDeviceInfos) {
-          try {
-            const mediaStream = await navigator.mediaDevices.getUserMedia({
-              audio: false,
-              video: {
-                deviceId: mediaDeviceInfo.deviceId,
-              },
-            });
-
-            newCameras.push({
-              mediaDeviceInfo,
-              mediaStream,
-              type: guessCameraType(mediaDeviceInfo),
-            });
-          } catch (error) {
-            dError(error);
-          }
-        }
-
-        dLog(
-          `Retrieved the streams of ${newCameras
-            .map((camera) => camera.mediaDeviceInfo.deviceId)
-            .join(", ")}`
-        );
-
-        if (newCameras.length <= 0) {
-          return;
-        }
-
-        setCameras(newCameras);
-        setCurrentCameraIndex(0);
-      })();
-    },
-    // We don't put `cameras` in the dependency array.
-    // Normally we can avoid this hack by using callback state setter.
-    // But because of the awaits, we can't use that...
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [setCameras]
+async function getCameraDevices() {
+  return (await navigator.mediaDevices.enumerateDevices()).filter(
+    (device) => device.kind === "videoinput"
   );
+}
 
-  return { cameras, currentCameraIndex, setCurrentCameraIndex };
+async function getCameras(devices: Array<MediaDeviceInfo>) {
+  const cameras: Array<Camera> = [];
+
+  for (const device of devices) {
+    // If we get an exception, we just continue.
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: false,
+        video: {
+          deviceId: device.deviceId,
+        },
+      });
+
+      cameras.push({
+        device,
+        stream,
+        type: guessCameraType(device),
+      });
+    } catch (error) {
+      dError(error);
+    }
+  }
+
+  return cameras;
+}
+
+export default function useCamera() {
+  // We use useRecoilCallback() for avoiding putting `cameras` in the dependency list.
+  const load = useRecoilCallback(({ snapshot, set }) => async () => {
+    // Stop the existing cameras for avoiding OverconstrainedError.
+    stopCameras(await snapshot.getPromise(camerasState));
+
+    const devices = await getCameraDevices();
+    dLog("Loaded the devices", ...devices);
+
+    const cameras = await getCameras(devices);
+    dLog("Loaded the streams", ...cameras);
+
+    set(camerasState, cameras);
+  });
+
+  useEffect(() => {
+    load();
+  }, [load]);
 }

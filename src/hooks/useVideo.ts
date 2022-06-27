@@ -3,9 +3,9 @@ import { useEffect } from "react";
 import { isBrowser } from "utils/RenderUtils";
 import { dLog } from "utils/DebugUtils";
 
-let video: HTMLVideoElement | undefined = undefined;
+let video: HTMLVideoElement | null = null;
 
-if (isBrowser() && typeof video === "undefined") {
+if (isBrowser() && video === null) {
   video = document.createElement("video");
 
   // For supporting playing without user interaction.
@@ -22,7 +22,7 @@ export default function useVideo(
   onPlay: (video: HTMLVideoElement) => void
 ) {
   useEffect(() => {
-    if (typeof video === "undefined") {
+    if (video === null) {
       return;
     }
 
@@ -33,7 +33,7 @@ export default function useVideo(
     video.srcObject = mediaStream;
 
     video.oncanplaythrough = () => {
-      if (typeof video === "undefined") {
+      if (video === null) {
         return;
       }
 

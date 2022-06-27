@@ -1,12 +1,15 @@
-import React, { ComponentProps } from "react";
+import React, { ComponentProps, ForwardedRef, forwardRef } from "react";
 import NextLink from "next/link";
 
 type LinkProps = ComponentProps<"a">;
 
-const Link = ({ href, ...others }: LinkProps) => (
+const Link = (
+  { href, ...others }: LinkProps,
+  ref: ForwardedRef<HTMLAnchorElement>
+) => (
   <NextLink href={href ?? "#"}>
-    <a {...others} target="_blank" rel="noreferrer noopener" />
+    <a ref={ref} {...others} target="_blank" rel="noreferrer noopener" />
   </NextLink>
 );
 
-export default Link;
+export default forwardRef(Link);
