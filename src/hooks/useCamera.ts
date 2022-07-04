@@ -1,6 +1,6 @@
 import { useRecoilCallback } from "recoil";
 
-import { dLog, dError } from "utils/DebugUtils";
+import { dLog } from "utils/DebugUtils";
 import { Camera, camerasState, CameraType } from "states/Camera";
 
 function guessCameraType(mediaDeviceInfo: MediaDeviceInfo): CameraType {
@@ -48,7 +48,7 @@ async function getCameras(devices: Array<MediaDeviceInfo>) {
         type: guessCameraType(device),
       });
     } catch (error) {
-      dError(error);
+      console.error(error);
     }
   }
 
