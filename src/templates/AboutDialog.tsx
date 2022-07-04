@@ -1,7 +1,7 @@
 import React from "react";
-import styled from "@emotion/styled";
 import Dialog from "@mui/material/Dialog";
-import Button from "@mui/material/Button";
+
+import { Paragraph, TextButton } from "components/DialogParts";
 
 interface Props {
   open: boolean;
@@ -25,25 +25,8 @@ const AboutDialog = ({ open, onClose }: Props) => (
       이 앱은 운동 지지리도 안 하던 제가 깔짝이라도 하게 만든 무한루프 운동
       인증방, 특히 반장님에 대한 감사의 마음으로 만들었습니다.
     </Paragraph>
-    <CloseButton onClick={onClose}>닫기</CloseButton>
+    <TextButton onClick={onClose}>닫기</TextButton>
   </Dialog>
 );
-
-const Paragraph = styled.p`
-  box-sizing: border-box;
-
-  width: 100%;
-  padding: 0 1rem;
-
-  &:not(:first-of-type) {
-    margin-top: 0.5rem;
-  }
-`;
-
-const CloseButton = styled(Button)`
-  color: inherit;
-  font-weight: normal;
-  font-size: 1rem;
-`;
 
 export default AboutDialog;

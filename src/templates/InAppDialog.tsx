@@ -1,7 +1,7 @@
 import React from "react";
-import styled from "@emotion/styled";
 import Dialog from "@mui/material/Dialog";
-import Button from "@mui/material/Button";
+
+import { Paragraph, TextButton } from "components/DialogParts";
 
 interface Props {
   open: boolean;
@@ -15,21 +15,8 @@ const InAppDialog = ({ open, onClose }: Props) => (
       않습니다! 사용하시는 웹 브라우저로 직접 열고, 카메라 선택 창에서 새로고침
       버튼을 한번 누르시기를 권장합니다.
     </Paragraph>
-    <CloseButton onClick={onClose}>닫기</CloseButton>
+    <TextButton onClick={onClose}>닫기</TextButton>
   </Dialog>
 );
-
-const Paragraph = styled.p`
-  box-sizing: border-box;
-
-  width: 100%;
-  padding: 0 1rem;
-`;
-
-const CloseButton = styled(Button)`
-  color: inherit;
-  font-weight: normal;
-  font-size: 1rem;
-`;
 
 export default InAppDialog;
