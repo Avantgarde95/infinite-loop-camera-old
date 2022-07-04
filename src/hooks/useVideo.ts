@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-import { isBrowser } from "utils/RenderUtils";
+import { isBrowser } from "utils/DeviceUtils";
 import { dLog } from "utils/DebugUtils";
 
 let video: HTMLVideoElement | null = null;
