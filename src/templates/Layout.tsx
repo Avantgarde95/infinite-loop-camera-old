@@ -1,10 +1,7 @@
 import React, { ReactNode } from "react";
 import styled from "@emotion/styled";
-import { FaGithub } from "react-icons/fa";
 
-import Link from "components/Link";
-import { css, Theme } from "@emotion/react";
-import Button from "@mui/material/Button";
+import Header from "templates/Header";
 
 interface LayoutProps {
   children: ReactNode;
@@ -12,22 +9,23 @@ interface LayoutProps {
 
 const Layout = ({ children }: LayoutProps) => (
   <Container>
-    <Header>
-      <Title>∞ 무한루프 카메라</Title>
-      <Controls>
-        <Control
-          LinkComponent={Link}
-          href="https://github.com/Avantgarde95/infinite-camera"
-        >
-          <FaGithub />
-        </Control>
-      </Controls>
-    </Header>
-    <Main>{children}</Main>
+    <Content>
+      <Header />
+      <Main>{children}</Main>
+    </Content>
   </Container>
 );
 
 const Container = styled.div`
+  overflow-y: auto;
+
+  width: 100%;
+  height: 100%;
+
+  background-color: ${({ theme }) => theme.color.background};
+`;
+
+const Content = styled.div`
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -47,43 +45,9 @@ const Container = styled.div`
   }
 `;
 
-const Header = styled.header`
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-
-  width: 100%;
-  padding: 1rem 1rem;
-`;
-
 const Main = styled.main`
   width: 100%;
   height: 100%;
-`;
-
-const Title = styled.h1`
-  margin: 0;
-  padding: 0;
-
-  font-size: 1.5rem;
-  font-weight: normal;
-  line-height: 1.5rem;
-`;
-
-const Controls = styled.div`
-  margin-left: auto;
-`;
-
-const Control = styled(Button)`
-  width: 2rem;
-  height: 2rem;
-  min-width: auto;
-  padding: 0;
-  font-size: 2rem;
-
-  border: 0;
-  border-radius: 50%;
 `;
 
 export default Layout;

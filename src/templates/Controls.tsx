@@ -2,11 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import styled from "@emotion/styled";
 import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import List from "@mui/material/List";
-import ListItemButton from "@mui/material/ListItemButton";
+import IconButton from "@mui/material/IconButton";
 import { GiHorizontalFlip } from "react-icons/gi";
-import { IoMdReverseCamera } from "react-icons/io";
+import { MdFlipCameraIos } from "react-icons/md";
 
 import {
   camerasState,
@@ -14,11 +12,13 @@ import {
   flipCameraState,
   captureCameraState,
 } from "states/Camera";
+import SelectDialog from "templates/SelectDialog";
+import { resetMUIButton, resetMUIIconButton } from "styles/Mixins";
 
 const Controls = () => {
   const cameras = useRecoilValue(camerasState);
   const [flipCamera, setFlipCamera] = useRecoilState(flipCameraState);
-  const [cameraIndex, setCameraIndex] = useRecoilState(cameraIndexState);
+  const cameraIndex = useRecoilValue(cameraIndexState);
   const setCaptureCamera = useSetRecoilState(captureCameraState);
 
   const [openSelectDialog, setOpenSelectDialog] = useState(false);
@@ -30,15 +30,15 @@ const Controls = () => {
     }
   }, [cameras, cameraIndex, setFlipCamera]);
 
-  const handleClickFlip = () => {
+  const handleClickFlipButton = () => {
     setFlipCamera(!flipCamera);
   };
 
-  const handleClickCapture = () => {
+  const handleClickCaptureButton = () => {
     setCaptureCamera(true);
   };
 
-  const handleClickChange = () => {
+  const handleClickChangeButton = () => {
     setOpenSelectDialog(true);
   };
 
@@ -46,88 +46,73 @@ const Controls = () => {
     setOpenSelectDialog(false);
   };
 
-  const handleClickSelect = (index: number) => {
-    setCameraIndex(index);
-    setOpenSelectDialog(false);
-  };
-
   return (
     <Container>
-      <IconButton variant="outlined" onClick={handleClickFlip}>
-        <Icon>
+      <TopArea>
+        <ControlButton onClick={handleClickFlipButton}>
           <GiHorizontalFlip />
-        </Icon>
-      </IconButton>
-      <CaptureButton variant="contained" onClick={handleClickCapture} />
-      <IconButton variant="outlined" onClick={handleClickChange}>
-        <Icon>
-          <IoMdReverseCamera />
-        </Icon>
-      </IconButton>
-      <Dialog open={openSelectDialog} onClose={handleCloseChangeDialog}>
-        <List>
-          {cameras.map((camera, index) => (
-            <ListItemButton
-              selected={index === cameraIndex}
-              key={index}
-              onClick={() => {
-                handleClickSelect(index);
-              }}
-            >
-              {`Camera ${index + 1} (Type: ${camera.type})`}
-            </ListItemButton>
-          ))}
-        </List>
-      </Dialog>
+        </ControlButton>
+        <CaptureButton variant="contained" onClick={handleClickCaptureButton} />
+        <ControlButton onClick={handleClickChangeButton}>
+          <MdFlipCameraIos />
+        </ControlButton>
+      </TopArea>
+      <BottomArea>
+        <Description>촬영한 사진들은 갤러리 앱에서 확인해주세요</Description>
+      </BottomArea>
+      <SelectDialog open={openSelectDialog} onClose={handleCloseChangeDialog} />
     </Container>
   );
 };
 
 const Container = styled.div`
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+
+  width: 100%;
+  padding: 1rem 0;
+  flex: 1;
+`;
+
+const TopArea = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: space-evenly;
   align-items: center;
 
   width: 100%;
+`;
+
+const BottomArea = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+
+  width: 100%;
   margin-top: 1rem;
 `;
 
 const CaptureButton = styled(Button)`
-  width: 4rem;
-  height: 4rem;
-  padding: 0;
+  ${resetMUIButton}
+
+  width: 3.5rem;
+  height: 3.5rem;
   border-radius: 50%;
-
-  &::after {
-    display: block;
-    content: "";
-
-    width: 3rem;
-    height: 3rem;
-    border-radius: 50%;
-    border: 1px solid ${({ theme }) => theme.color.background};
-  }
 `;
 
-const IconButton = styled(Button)`
+const ControlButton = styled(IconButton)`
+  ${resetMUIIconButton}
+
   width: 3rem;
   height: 3rem;
-  min-width: auto;
-  border-radius: 50%;
-  padding: 0;
+  font-size: 2rem;
 `;
 
-const Icon = styled.span`
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-
-  width: 100%;
-  height: 100%;
-
-  font-size: 1.5rem;
+const Description = styled.div`
+  margin: 0 0.5rem;
+  text-align: center;
 `;
 
 export default Controls;
