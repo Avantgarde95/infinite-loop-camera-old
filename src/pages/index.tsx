@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "@emotion/styled";
 
-import { isInApp } from "utils/DeviceUtils";
+import { isInApp } from "utils/BrowserUtils";
 import useCamera from "hooks/useCamera";
 import Camera from "templates/Camera";
 import Controls from "templates/Controls";
@@ -10,7 +10,11 @@ import InAppDialog from "templates/InAppDialog";
 const HomePage = () => {
   const [openInAppDialog, setOpenInAppDialog] = useState(isInApp());
 
-  useCamera();
+  const { loadCameras } = useCamera();
+
+  useEffect(() => {
+    loadCameras();
+  }, [loadCameras]);
 
   const handleCloseInAppDialog = () => {
     setOpenInAppDialog(false);

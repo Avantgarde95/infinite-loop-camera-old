@@ -7,14 +7,15 @@ import { dLog } from "utils/DebugUtils";
  */
 export default function useAnimation(onFrame: () => void, fps: number) {
   useEffect(() => {
-    dLog(`Animation start (Target FPS: ${fps})`);
-
     const interval = setInterval(() => {
       onFrame();
     }, 1000 / fps);
 
+    dLog(`Started an animation (Target FPS: ${fps})`);
+
     return () => {
       clearInterval(interval);
+      dLog("Stopped the animation");
     };
   }, [onFrame, fps]);
 }

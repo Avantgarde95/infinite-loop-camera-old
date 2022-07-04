@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { useRecoilCallback } from "recoil";
 
 import { dLog, dError } from "utils/DebugUtils";
@@ -57,21 +56,24 @@ async function getCameras(devices: Array<MediaDeviceInfo>) {
 }
 
 export default function useCamera() {
-  // We use useRecoilCallback() for avoiding putting `cameras` in the dependency list.
-  const load = useRecoilCallback(({ snapshot, set }) => async () => {
+  const loadCameras = useRecoilCallback(({ snapshot, set }) => async () => {
+    dLog("Loading the cameras...");
+
     // Stop the existing cameras for avoiding OverconstrainedError.
     stopCameras(await snapshot.getPromise(camerasState));
+    dLog("- Stopped the existing cameras");
 
     const devices = await getCameraDevices();
-    dLog("Loaded the devices", ...devices);
+    dLog("- Loaded the devices", ...devices);
 
     const cameras = await getCameras(devices);
-    dLog("Loaded the streams", ...cameras);
+    dLog("- Loaded the streams", ...cameras);
 
     set(camerasState, cameras);
+    dLog("- Done!");
   });
 
-  useEffect(() => {
-    load();
-  }, [load]);
+  return {
+    loadCameras,
+  };
 }

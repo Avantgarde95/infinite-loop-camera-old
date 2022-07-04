@@ -7,8 +7,15 @@ import ListItemButton from "@mui/material/ListItemButton";
 import IconButton from "@mui/material/IconButton";
 import { IoReload } from "react-icons/io5";
 
-import { cameraIndexState, camerasState } from "states/Camera";
+import { cameraIndexState, camerasState, CameraType } from "states/Camera";
+import useCamera from "hooks/useCamera";
 import { resetMUIIconButton } from "styles/Mixins";
+
+const typeNameMap: Record<CameraType, string> = {
+  Front: "전면",
+  Back: "후면",
+  Unknown: "??",
+};
 
 interface Props {
   open: boolean;
@@ -19,9 +26,15 @@ const SelectDialog = ({ open, onClose }: Props) => {
   const cameras = useRecoilValue(camerasState);
   const [cameraIndex, setCameraIndex] = useRecoilState(cameraIndexState);
 
+  const { loadCameras } = useCamera();
+
   const handleClickItem = (index: number) => {
     setCameraIndex(index);
     onClose();
+  };
+
+  const handleClickReloadButton = () => {
+    loadCameras();
   };
 
   return (
@@ -35,11 +48,11 @@ const SelectDialog = ({ open, onClose }: Props) => {
               handleClickItem(index);
             }}
           >
-            {`Camera ${index + 1} (Type: ${camera.type})`}
+            {`카메라 ${index + 1} (타입: ${typeNameMap[camera.type]})`}
           </ListItemButton>
         ))}
       </List>
-      <ReloadButton>
+      <ReloadButton onClick={handleClickReloadButton}>
         <IoReload />
       </ReloadButton>
     </Dialog>

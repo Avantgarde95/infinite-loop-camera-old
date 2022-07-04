@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-import { isBrowser } from "utils/DeviceUtils";
+import { isBrowser } from "utils/BrowserUtils";
 import { dLog } from "utils/DebugUtils";
 
 let video: HTMLVideoElement | null = null;
@@ -19,7 +19,7 @@ if (isBrowser() && video === null) {
  */
 export default function useVideo(
   mediaStream: MediaStream | undefined,
-  onPlay: (video: HTMLVideoElement) => void
+  onPlay?: (video: HTMLVideoElement) => void
 ) {
   useEffect(() => {
     if (video === null) {
@@ -37,10 +37,17 @@ export default function useVideo(
         return;
       }
 
-      onPlay(video);
+      video.play();
+      onPlay && onPlay(video);
     };
 
-    video.play();
+    return () => {
+      if (video === null) {
+        return;
+      }
+
+      video.pause();
+    };
   }, [mediaStream, onPlay]);
 
   return { video };

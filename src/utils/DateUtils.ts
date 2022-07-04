@@ -36,7 +36,7 @@ export function getTimeStrings(time: Time) {
     month: `${time.month + 1}`.padStart(2, "0"),
     monthDay: `${time.monthDay + 1}`.padStart(2, "0"),
     weekDay: weekDayNames[time.weekDay % 7].slice(0, 3),
-    hour: `${ampmHour === 0 ? 12 : ampmHour}`,
+    hour: `${ampmHour === 0 ? 12 : ampmHour}`.padStart(2, "0"),
     minute: `${time.minute}`.padStart(2, "0"),
     ampm: time.hour >= 12 ? "PM" : "AM",
   };
