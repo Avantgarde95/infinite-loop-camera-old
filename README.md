@@ -23,19 +23,21 @@ Run in the development mode
 - Run `yarn dev`
 - Open <http://localhost:3000> on the browser
 
-Generate the static website
-
-- Run `yarn build`
-- Run `yarn export`
-
 Check the code
 
 - Run `yarn lint`
 - Run `yarn lint` to check & fix
 
+## Logs in the production mode
+
+- The app doesn't print the logs on the console in the production mode.
+- But, if you add `debug` parameter to the URL (ex. `https://...com/?debug`),
+  the app will print the logs
+
 ## Testing on mobile device
 
-In some browsers (ex. Chrome), WebRTC requires HTTPS connection.  
-So if you use the test server with your phone, camera feature won't work in some cases.  
-Then, install [ngrok](https://ngrok.com/) and run `ngrok http 3000` in the other terminal.  
+In some browsers (ex. Chrome), the app requires **HTTPS connection**.
+So if you access the dev. server with your phone, some features might not work.
+
+Install [ngrok](https://ngrok.com/) and run `ngrok http 3000` in the other terminal.
 It will generate a HTTPS url (ex. `https://...ngrok.io`). Open that URL with your phone.

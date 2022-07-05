@@ -1,3 +1,5 @@
+import { isBrowser } from "utils/BrowserUtils";
+
 export function isDevelopmentMode() {
   return process.env.NODE_ENV === "development";
 }
@@ -8,7 +10,10 @@ const pass: Logger = () => {
   // Do nothing.
 };
 
-// Prints only in the development mode.
-export const dLog: Logger = isDevelopmentMode() ? console.log : pass;
-export const dWarn: Logger = isDevelopmentMode() ? console.warn : pass;
-export const dError: Logger = isDevelopmentMode() ? console.error : pass;
+const enableLogger =
+  isDevelopmentMode() ||
+  (isBrowser() && new URL(location.href).searchParams.get("debug") !== null);
+
+export const dLog: Logger = enableLogger ? console.log : pass;
+export const dWarn: Logger = enableLogger ? console.warn : pass;
+export const dError: Logger = enableLogger ? console.error : pass;
